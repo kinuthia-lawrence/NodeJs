@@ -5,6 +5,22 @@ const http = require("http"); //works with a server.
 const express = require("express"); // web framework for nodejs
 const path = require("path");
 const app = express(); //creating an instance of express
+const Joi = require("joi"); // for input validation
+app.use(express.json()); // to parse the json data from the request body
+
+const movies = [
+  { id: 1, name: "Star Wars" },
+  { id: 2, name: "Avengers" },
+  { id: 3, name: "Harry Potter" },
+  { id: 4, name: "The Lord of the Rings" },
+  { id: 5, name: "The Matrix" },
+  { id: 6, name: "Jurassic Park" },
+  { id: 7, name: "The Dark Knight" },
+  { id: 8, name: "Inception" },
+  { id: 9, name: "The Shawshank Redemption" },
+  { id: 10, name: "The Godfather" },
+  { id: 11, name: "Pulp Fiction" },
+];
 
 // logger.log(`Hello from larry module.${logger.variableAbc}`)
 //? getting os details -- os module.
@@ -91,8 +107,77 @@ app.get("/index", (req, res) => {
 const port = process.env.PORT || "5000";
 app.listen(port, () => console.log(`Listening to Port : ${port}`));
 
-//Nodemon
+//?Nodemon
 /* 
 npm install -g nodemon
-
+nodemon app.js -- to run the app with nodemon
 */
+
+//? Https request [GET, POST, PUT, DELETE]
+
+// GET - to get the data from the server
+app.get("/api/movies", (req, res) => {
+  res.send(movies);
+});
+
+app.get("/api/movies/:id", (req, res) => {
+  let movie = movies.find((m) => m.id === parseInt(req.params.id));
+  if (!movie) {
+    return res.status(404).send("Movie not found wiht id : " + req.params.id);
+  }
+  res.send(movie);
+});
+
+// POST - to create a new resource
+app.post("/api/movies", (req, res) => {
+  //? Input validation using Joi
+  /**npm install joi
+   * We must create a schema for the input validation.
+   * Joi is a powerful schema description language and data validator for JavaScript.
+   * It allows you to define a schema for your data and validate it against that schema.
+   */
+  const schema = Joi.object({
+    name: Joi.string().min(3).required(),
+  });
+  const result = schema.validate(req.body);
+  console.log(result);
+  if (result.error) {
+    return res.status(400).send(result.error.details[0].message);
+  }
+
+  let movie = {
+    id: movies.length + 1,
+    name: req.body.name,
+  };
+  movies.push(movie);
+  res.send(movie);
+});
+
+// PUT - to update an existing resource
+app.put("/api/movies/:id", (req, res) => {
+  let movie = movies.find((m) => m.id === parseInt(req.params.id));
+  if (!movie) {
+    return res.status(404).send("Movie not found with id : " + req.params.id);
+  }
+  const schema = Joi.object({
+    name: Joi.string().min(3).required(),
+  });
+  const result = schema.validate(req.body);
+  console.log(result);
+  if (result.error) {
+    return res.status(400).send(result.error.details[0].message);
+  }
+  movie.name = req.body.name;
+  res.send(movie);
+});
+
+// DELETE - to delete an existing resource
+app.delete("/api/movies/:id", (req, res) => {
+  let movie = movies.find((m) => m.id === parseInt(req.params.id));
+  if (!movie) {
+    return res.status(404).send("Movie not found with id : " + req.params.id);
+  }
+  const index = movies.indexOf(movie);
+  movies.splice(index, 1);
+  res.send(movie);
+});
