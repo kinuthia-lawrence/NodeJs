@@ -3,6 +3,7 @@ const os = require("os"); // gives all info about file system.
 const fs = require("fs"); //works with file system.
 const http = require("http"); //works with a server.
 const express = require("express"); // web framework for nodejs
+const path = require("path");
 const app = express(); //creating an instance of express
 
 // logger.log(`Hello from larry module.${logger.variableAbc}`)
@@ -68,12 +69,30 @@ example: ^1.x.x,  ~1.0.x
 npm install express --save --to install express js
 
 */
-app.get('/', (req,res) =>{
-    res.send("Hello from express");
+app.get("/", (req, res) => {
+  res.send("Hello from Larrykin343");
+});
+app.get("/person/:name/:age", (req, res) => {
+  const name = req.params.name;
+  const age = req.params.age;
+  //   res.send(`Hello ${name} your age is ${age}`);
+  res.send(req.params);
+  // request parameters are used to get the data from the url.(required)
+  //query parameters are used to get the data from the url.(optional)
 });
 
+app.get("/index", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+  // __dirname is a global variable that gives the current directory of the file.
+});
 
-app.listen('5000');
+// app.listen("5000");
+// set PORT = 3000 //setting the port in the env. through the terminal.
+const port = process.env.PORT || "5000";
+app.listen(port, () => console.log(`Listening to Port : ${port}`));
 
+//Nodemon
+/* 
+npm install -g nodemon
 
-
+*/
